@@ -5,17 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Register - Digital Village Office</title>
+    <style>
+        /* Visual feedback for invalid fields while typing */
+        input:invalid:focus {
+            border-color: #ef4444;
+            ring-color: rgba(239, 68, 68, 0.2);
+        }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-6">
 
 <main class="max-w-2xl w-full mx-auto p-10 bg-white rounded-3xl shadow-2xl">
     <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Join the Digital Village</h2>
     
+    <!-- Step 1: Role Selection -->
     <div class="flex gap-4 mb-8">
-        <button id="btn-applicant" onclick="setRole('applicant')" class="flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all">
+        <button id="btn-applicant" type="button" onclick="setRole('applicant')" class="flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all">
             Citizen / Applicant
         </button>
-        <button id="btn-officer" onclick="setRole('officer')" class="flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">
+        <button id="btn-officer" type="button" onclick="setRole('officer')" class="flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">
             Village Officer
         </button>
     </div>
@@ -24,23 +32,49 @@
         <input type="hidden" name="role" id="role-input" value="applicant">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="full_name" placeholder="Full Name" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
-            <input type="date" name="dob" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
+            <!-- Name -->
+            <input type="text" name="full_name" placeholder="Full Name" 
+                   class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
+            <!-- Date of Birth -->
+            <input type="date" name="dob" 
+                   class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
         </div>
 
-        <input type="tel" name="phone" placeholder="Phone Number" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500">
-        <input type="email" name="email" placeholder="Email Address" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500">
+        <!-- Phone Number: Exactly 10 digits -->
+        <input type="tel" name="phone" placeholder="Phone Number (10 digits)" 
+               pattern="[0-9]{10}" 
+               title="Please enter exactly 10 digits"
+               class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
 
+        <!-- Email: Strict domain validation -->
+        <input type="email" name="email" placeholder="Email Address (@gmail, @yahoo, etc.)" 
+               pattern="[a-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|icloud)\.com$"
+               title="Please use a valid domain (e.g., @gmail.com, @yahoo.com)"
+               class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
+
+        <!-- Aadhaar: Exactly 12 digits -->
         <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
             <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Government ID (Aadhaar)</label>
-            <input type="text" name="govt_id" placeholder="12-Digit ID Number" class="w-full mt-2 p-2 border-b bg-transparent outline-none focus:border-blue-500" required>
+            <input type="text" name="govt_id" placeholder="12-Digit ID Number" 
+                   pattern="[0-9]{12}" 
+                   title="Aadhaar must be exactly 12 digits"
+                   maxlength="12"
+                   class="w-full mt-2 p-2 border-b bg-transparent outline-none focus:border-blue-500" required>
         </div>
 
-        <input type="password" name="password" placeholder="Create Strong Password" class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-blue-500" required>
+        <!-- Password: Capital start, length 8+, digit, and special char -->
+        <input type="password" name="password" placeholder="Create Strong Password" 
+               pattern="^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$"
+               title="Must start with a Capital letter, minimum 8 characters, include a lowercase letter, a digit, and a special character."
+               class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-blue-500" required>
 
         <button type="submit" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black shadow-lg hover:bg-blue-800 transition-transform transform active:scale-95">
             Finalize Account 🛡️
         </button>
+        
+        <p class="text-center text-sm text-slate-500 mt-4">
+            Already registered? <a href="/login" class="text-blue-600 font-bold hover:underline">Login here</a>
+        </p>
     </form>
 </main>
 

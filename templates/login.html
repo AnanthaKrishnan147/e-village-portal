@@ -6,37 +6,54 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Login - Digital Village Office</title>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center relative">
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center relative p-4">
 
     <div class="absolute top-6 right-6">
-        <a href="/register" class="bg-white text-blue-600 border border-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-blue-50 transition">
-            Register
+        <a href="/register" class="bg-white text-blue-600 border border-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-blue-50 transition-all shadow-sm">
+            New Registration
         </a>
     </div>
 
-    <main class="w-full max-w-md p-8 bg-white rounded-3xl shadow-xl border border-slate-100">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-blue-900">Welcome Back</h1>
-            <p class="text-slate-500 mt-2">Access the Village Services Portal</p>
+    <main class="w-full max-w-md p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4">
+                <span class="text-3xl">🏛️</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-blue-900 tracking-tight">Welcome Back</h1>
+            <p class="text-slate-500 mt-2 font-medium">Digital Village Services Portal</p>
         </div>
 
         <form action="/login" method="POST" class="space-y-6">
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">User ID</label>
-                <input type="text" name="user_id" placeholder="Enter your User ID" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-[0.2em]">Email Address</label>
+                <div class="relative">
+                    <input type="email" name="user_id" placeholder="name@gmail.com" required
+                        class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                        pattern="[a-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|icloud)\.com$"
+                        title="Please use a valid domain (e.g., @gmail.com)">
+                    <span class="absolute left-4 top-4 opacity-40">📧</span>
+                </div>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Password</label>
-                <input type="password" name="password" placeholder="••••••••" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-[0.2em]">Secure Password</label>
+                <div class="relative">
+                    <input type="password" name="password" placeholder="••••••••" required
+                        class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all">
+                    <span class="absolute left-4 top-4 opacity-40">🔒</span>
+                </div>
             </div>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-[0.98]">
-                Login 🚀
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                Access Portal 🚀
             </button>
         </form>
+
+        <div class="mt-8 pt-6 border-t border-slate-50 text-center">
+            <p class="text-slate-500 text-sm">
+                Can't log in? <a href="#" class="text-blue-600 font-bold hover:underline">Reset Password</a>
+            </p>
+        </div>
     </main>
 
 </body>
