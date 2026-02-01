@@ -70,6 +70,31 @@ def check_eligibility():
             "status": "mismatch",
             "message": "Document type mismatch. Expected Aadhaar based on regional rules."
         })
+        
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        role = request.form.get('role') # 'applicant' or 'officer'
+        
+        # 1. Capture Personal Info
+        name = request.form.get('full_name')
+        dob = request.form.get('dob')
+        
+        # 2. Capture Govt ID
+        govt_id = request.form.get('govt_id')
+        
+        # 3. SECURE ACCOUNT CREATION
+        password = request.form.get('password')
+        # Hashing the password securely before saving to database
+        hashed_pw = generate_password_hash(password, method='scrypt')
+        
+        # System Lead Note: Print for verification in console
+        print(f"Role: {role} | User: {name} | Secure Hash: {hashed_pw[:20]}...")
+        
+        return redirect(url_for('login'))
+        
+    return render_template('register.html')
+        
 
 if __name__ == '__main__':
     app.run(debug=True)

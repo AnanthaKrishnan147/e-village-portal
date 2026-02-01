@@ -8,53 +8,59 @@
 </head>
 <body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-6">
 
-    <main class="w-full max-w-xl p-8 bg-white rounded-3xl shadow-xl border border-slate-100">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-blue-900">Create Account</h1>
-            <p class="text-slate-500 mt-2">Register to access regional eligibility services.</p>
+<main class="max-w-2xl w-full mx-auto p-10 bg-white rounded-3xl shadow-2xl">
+    <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Join the Digital Village</h2>
+    
+    <div class="flex gap-4 mb-8">
+        <button id="btn-applicant" onclick="setRole('applicant')" class="flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all">
+            Citizen / Applicant
+        </button>
+        <button id="btn-officer" onclick="setRole('officer')" class="flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">
+            Village Officer
+        </button>
+    </div>
+
+    <form id="reg-form" action="/register" method="POST" class="space-y-4">
+        <input type="hidden" name="role" id="role-input" value="applicant">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" name="full_name" placeholder="Full Name" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
+            <input type="date" name="dob" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
         </div>
 
-        <form action="/register" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Full Name</label>
-                <input type="text" name="full_name" placeholder="John Doe" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
-            </div>
+        <input type="tel" name="phone" placeholder="Phone Number" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500">
+        <input type="email" name="email" placeholder="Email Address" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500">
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Aadhaar Number</label>
-                <input type="text" name="aadhaar_no" placeholder="1234 5678 9012" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
-            </div>
+        <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Government ID (Aadhaar)</label>
+            <input type="text" name="govt_id" placeholder="12-Digit ID Number" class="w-full mt-2 p-2 border-b bg-transparent outline-none focus:border-blue-500" required>
+        </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Phone Number</label>
-                <input type="tel" name="phone" placeholder="+91 00000 00000" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
-            </div>
+        <input type="password" name="password" placeholder="Create Strong Password" class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-blue-500" required>
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Create Password</label>
-                <input type="password" name="password" placeholder="••••••••" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
-            </div>
+        <button type="submit" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black shadow-lg hover:bg-blue-800 transition-transform transform active:scale-95">
+            Finalize Account 🛡️
+        </button>
+    </form>
+</main>
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Confirm Password</label>
-                <input type="password" name="confirm_password" placeholder="••••••••" required
-                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
-            </div>
+<script>
+    function setRole(role) {
+        const roleInput = document.getElementById('role-input');
+        const btnApplicant = document.getElementById('btn-applicant');
+        const btnOfficer = document.getElementById('btn-officer');
 
-            <div class="md:col-span-2 mt-4">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01]">
-                    Create Account 🚀
-                </button>
-                <p class="text-center text-slate-500 mt-6 text-sm">
-                    Already have an account? <a href="/login" class="text-blue-600 font-bold hover:underline">Login here</a>
-                </p>
-            </div>
-        </form>
-    </main>
+        roleInput.value = role;
+
+        if (role === 'applicant') {
+            btnApplicant.className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
+            btnOfficer.className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
+        } else {
+            btnOfficer.className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
+            btnApplicant.className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
+        }
+    }
+</script>
 
 </body>
 </html>
