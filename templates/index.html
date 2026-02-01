@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans">
+    <nav class="p-6 bg-white shadow-sm flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-900">Digital Village Office</h1>
+        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Contact Support</button>
+    </nav>
+
+    <main class="max-w-4xl mx-auto mt-12 p-8 bg-white rounded-3xl shadow-xl border border-slate-100">
+        <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Check Your Eligibility</h2>
+        <p class="text-slate-500 mb-8">Upload your documents to verify your regional requirements.</p>
+
+        <form action="/check-eligibility" method="POST" enctype="multipart/form-data">
+        </form>
+
+
+        <div class="mb-8">
+        <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Village / Region</label>
+        <div class="relative">  
+        <input type="text" name="region" placeholder="Enter your village name..." 
+               class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            <span class="absolute left-4 top-4 text-xl">📍</span>
+        </div>
+        </div>
+
+        <button type="submit" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-[0.98]">
+            Verify Procedural Eligibility 🚀
+        </button>
+
+        <div class="mb-8">
+        <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Type of Service</label>
+        <select name="service_type" class="w-full p-4 rounded-2xl border-2 border-slate-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all appearance-none cursor-pointer">
+            <option value="caste">Caste Certificate</option>
+            <option value="income">Income Certificate</option>
+            <option value="residence">Residence Certificate</option>
+        </select>
+        </div>
+
+
+        <div class="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center hover:border-blue-400 transition cursor-pointer">
+            <p class="text-slate-400">Drag and drop your Aadhaar or Ration Card here</p>
+        </div>
+    </main>
+</body>
+</html>
+
