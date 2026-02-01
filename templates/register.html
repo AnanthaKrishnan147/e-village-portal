@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Register - Digital Village Office</title>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-6">
+
+    <main class="w-full max-w-xl p-8 bg-white rounded-3xl shadow-xl border border-slate-100">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-blue-900">Create Account</h1>
+            <p class="text-slate-500 mt-2">Register to access regional eligibility services.</p>
+        </div>
+
+        <form action="/register" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Full Name</label>
+                <input type="text" name="full_name" placeholder="John Doe" required
+                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Aadhaar Number</label>
+                <input type="text" name="aadhaar_no" placeholder="1234 5678 9012" required
+                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Phone Number</label>
+                <input type="tel" name="phone" placeholder="+91 00000 00000" required
+                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Create Password</label>
+                <input type="password" name="password" placeholder="••••••••" required
+                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider">Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="••••••••" required
+                    class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+            </div>
+
+            <div class="md:col-span-2 mt-4">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01]">
+                    Create Account 🚀
+                </button>
+                <p class="text-center text-slate-500 mt-6 text-sm">
+                    Already have an account? <a href="/login" class="text-blue-600 font-bold hover:underline">Login here</a>
+                </p>
+            </div>
+        </form>
+    </main>
+
+</body>
+</html>

@@ -3,40 +3,62 @@ import os
 
 app = Flask(__name__)
 
-# Configure where uploaded files go
+# --- Configuration ---
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# 1. THE RULE ENGINE (Mock Data)
-# In a real app, this would be in a database
-REGIONAL_RULES = {
-    "Village A": ["Aadhaar", "Ration Card"],
-    "Village B": ["Aadhaar", "Income Certificate", "Voter ID"]
-}
+# --- 1. Navigation Routes (Pages) ---
 
 @app.route('/')
-def index():
+def home():
+    # Landing page: You can point this to login or index
+    return render_template('login.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Technical Lead Note: This is where user_id/password verification happens
+        user_id = request.form.get('user_id')
+        password = request.form.get('password')
+        return f"Login Attempt for {user_id} Successful" 
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_page():
+    if request.method == 'POST':
+        # Capture form data
+        name = request.form.get('full_name')
+        aadhaar = request.form.get('aadhaar_no')
+        
+        # Technical Lead Note: In a real system, you would save this to SQLite here
+        print(f"New Registration: {name}, Aadhaar: {aadhaar}")
+        
+        # After registration, redirect back to login
+        return render_template('login.html', success_msg="Account created! Please login.")
+        
+    return render_template('register.html')
+
+@app.route('/portal')
+def portal():
+    # This serves your original citizen eligibility form
     return render_template('index.html')
 
-# 2. THE ELIGIBILITY LOGIC
+# --- 2. Functional Routes (Logic) ---
+
 @app.route('/check-eligibility', methods=['POST'])
 def check_eligibility():
-    # Grab data from your HTML form
     service = request.form.get('service_type')
     region = request.form.get('region')
     file = request.files.get('document')
 
-    # Simple logic for the hackathon:
     if not region or not file:
         return jsonify({"status": "error", "message": "Missing region or document!"})
 
-    # Save the file (to show the officer later)
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(file_path)
 
-    # SIMULATED AI/LOGIC CHECK
-    # Here is where you'd later add OCR to check for "Mismatches"
+    # Simplified AI/Logic Check
     if "Aadhaar" in file.filename:
         return jsonify({
             "status": "success", 
