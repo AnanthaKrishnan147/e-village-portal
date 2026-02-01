@@ -14,6 +14,9 @@
         <p class="text-slate-500 mb-8">Upload your documents to verify your regional requirements.</p>
 
         <form action="/check-eligibility" method="POST" enctype="multipart/form-data">
+            <button type="submit" class="w-full mt-8 bg-blue-600 text-white py-4 rounded-2xl font-bold">
+        Verify Eligibility 🚀
+            </button>
         </form>
 
 
@@ -44,6 +47,25 @@
             <p class="text-slate-400">Drag and drop your Aadhaar or Ration Card here</p>
         </div>
     </main>
+
+    <script>
+    const form = document.querySelector('form');
+    const verifyBtn = document.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function(e) {
+        // Change button text to show "AI processing"
+        verifyBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Analyzing Documents...
+        `;
+        verifyBtn.classList.add('opacity-80', 'cursor-not-allowed');
+    });
+</script>
+
+
 </body>
 </html>
 
