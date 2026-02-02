@@ -3,37 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>My Profile - Digital Village</title>
+    <title>My Profile</title>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen">
+    
     <nav class="p-6 bg-white shadow-sm flex justify-between items-center px-12">
-        <a href="/portal" class="text-blue-600 font-bold hover:underline">← Back to Dashboard</a>
+        <a href="/portal" class="text-blue-600 font-bold hover:underline">← Dashboard</a>
         <a href="/logout" class="text-red-600 font-bold hover:underline">Logout</a>
     </nav>
 
     <main class="max-w-2xl mx-auto mt-12 p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+        
         <div class="text-center mb-10">
-            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-lg">
-                <span class="text-4xl">👤</span>
+            <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-lg">
+                <span class="text-4xl">
+                    {% if user['role'] == 'officer' %} 👮‍♂️ {% else %} 👤 {% endif %}
+                </span>
             </div>
             <h2 class="text-3xl font-black text-slate-800">{{ user['full_name'] }}</h2>
-            <p class="text-blue-600 font-bold uppercase tracking-widest text-sm mt-1">{{ user['role'] }}</p>
+            <div class="inline-block mt-2 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide
+                {% if user['role'] == 'officer' %} bg-blue-900 text-white {% else %} bg-blue-100 text-blue-800 {% endif %}">
+                {{ user['role'] }} Account
+            </div>
         </div>
 
+        {% if user['role'] != 'officer' %}
+        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 text-center mb-8">
+            <p class="text-xs font-bold text-yellow-700 uppercase tracking-widest mb-1">Your Unique Client ID</p>
+            <p class="text-4xl font-black text-slate-800 tracking-widest font-mono selection:bg-yellow-200">{{ user['client_id'] }}</p>
+            <p class="text-xs text-slate-400 mt-2">Share this ID with the Village Officer to verify your profile.</p>
+        </div>
+        {% endif %}
+
         <div class="space-y-4">
-            <div class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <span class="text-slate-500 font-medium">Email</span>
-                <span class="font-bold text-slate-800">{{ user['email'] }}</span>
+            <div class="flex justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <span class="text-slate-500 font-medium">Username</span>
+                <span class="font-bold text-slate-800">{{ user['username'] }}</span>
             </div>
-            <div class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
+            <div class="flex justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
                 <span class="text-slate-500 font-medium">Phone</span>
                 <span class="font-bold text-slate-800">{{ user['phone'] }}</span>
             </div>
-            <div class="flex justify-between items-center p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
-                <span class="text-blue-700 font-medium">Aadhaar</span>
-                <span class="font-mono font-bold text-blue-900 tracking-wider">XXXX-XXXX-{{ user['govt_id'][-4:] }}</span>
+            <div class="flex justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <span class="text-slate-500 font-medium">Email</span>
+                <span class="font-bold text-slate-800">{{ user['email'] }}</span>
             </div>
         </div>
+
     </main>
 </body>
 </html>

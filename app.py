@@ -12,6 +12,7 @@ import string
 UPLOAD_FOLDER = 'user_documents'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 
+# Ensure upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -21,10 +22,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # --- 1. Database Management ---
 def init_db():
-    conn = sqlite3.connect('village_office.db')
+    conn = sqlite3.connect('village_office.db', timeout=10)
     cursor = conn.cursor()
     
-    # Updated Table: Added 'username' and 'client_id'
+    # Users Table (New Schema with Username & Client ID)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +41,7 @@ def init_db():
         )
     ''')
     
-    # Document table (same as before)
+    # Documents Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user_docs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,17 +72,19 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     if 'user_id' in session:
-        # Redirect based on role
+        # Smart Redirect based on role
         if session.get('role') == 'officer':
             return redirect(url_for('officer_dashboard'))
         return redirect(url_for('portal'))
     return redirect(url_for('login'))
 
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         role = request.form.get('role')
-        username = request.form.get('username').strip() # New Field
+        username = request.form.get('username').strip()
         name = request.form.get('full_name')
         dob = request.form.get('dob')
         phone = request.form.get('phone')
@@ -89,87 +92,221 @@ def register():
         govt_id = request.form.get('govt_id')
         password = request.form.get('password')
 
-        # Generate Unique Client ID
+        # Generate Unique Client ID & Hash Password
         new_client_id = generate_client_id()
         hashed_pw = generate_password_hash(password, method='scrypt')
 
         try:
-            conn = sqlite3.connect('village_office.db')
+            conn = sqlite3.connect('village_office.db', timeout=10)
             cursor = conn.cursor()
+            
+            # 1. Insert User into Database
             cursor.execute('''
                 INSERT INTO users (client_id, role, username, full_name, dob, phone, email, govt_id, password_hash) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (new_client_id, role, username, name, dob, phone, email, govt_id, hashed_pw))
+            
+            # Get the ID of the new user we just created
+            new_user_db_id = cursor.lastrowid
             conn.commit()
             conn.close()
+
+            # 2. AUTO-LOGIN: Set session variables immediately
+            session['user_id'] = new_user_db_id
+            session['client_id'] = new_client_id
+            session['user_name'] = name
+            session['role'] = role
             
-            # Show the Unique ID to the user upon success
-            return render_template('registration_success.html', client_id=new_client_id, name=name)
+            # 3. DIRECT REDIRECT: Go straight to the dashboard
+            if role == 'officer':
+                return redirect(url_for('officer_dashboard'))
+            
+            # Add a welcome flash message
+            flash(f"🎉 Welcome {name}! Your Client ID is {new_client_id}")
+            return redirect(url_for('portal'))
             
         except sqlite3.IntegrityError:
             return "❌ Error: Username, Email, or Aadhaar already exists. <a href='/register'>Try Again</a>"
+        except Exception as e:
+            return f"❌ System Error: {str(e)}"
 
     return render_template('register.html')
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Now authenticating via USERNAME
-        username_input = request.form.get('username').strip()
-        password = request.form.get('password')
+        # 1. Get the raw data from the form
+        username_input = request.form.get('username')
+        password_input = request.form.get('password')
+
+        # DEBUG PRINT: What did the form send?
+        print(f"\n--- DEBUG LOGIN START ---")
+        print(f"1. Form sent Username: '{username_input}'")
+        print(f"2. Form sent Password: '{password_input}'")
+
+        # Robust check: If 'username' is empty, try finding 'user_id' or 'email'
+        if not username_input:
+            print("   -> Username missing, checking fallback fields...")
+            username_input = request.form.get('user_id') or request.form.get('email')
         
-        conn = sqlite3.connect('village_office.db')
+        if not username_input:
+            print("❌ ERROR: No username found in form data.")
+            return "❌ Error: Browser sent empty username. Refresh page."
+
+        username_input = username_input.strip()
+
+        # 2. Database Lookup
+        conn = sqlite3.connect('village_office.db', timeout=10)
         conn.row_factory = sqlite3.Row
-        # Query matching username
+        
+        print(f"3. Searching DB for username: '{username_input}'")
         user = conn.execute("SELECT * FROM users WHERE username = ?", (username_input,)).fetchone()
         conn.close()
 
-        if user and check_password_hash(user['password_hash'], password):
+        # 3. Analyze the result
+        if user is None:
+            print(f"❌ RESULT: User '{username_input}' NOT FOUND in database.")
+            # OPTIONAL: Check if they used an email by mistake?
+            return f"❌ User '{username_input}' not found. Did you register?"
+        
+        print(f"✅ User found: ID={user['id']}, Role={user['role']}")
+        
+        # 4. Check Password
+        password_match = check_password_hash(user['password_hash'], password_input)
+        print(f"4. Password Verification Result: {password_match}")
+
+        if password_match:
+            print("✅ LOGIN SUCCESS! Redirecting...")
+            print("--- DEBUG LOGIN END ---\n")
+            
             session['user_id'] = user['id']
-            session['client_id'] = user['client_id'] # Store unique ID in session
+            session['client_id'] = user['client_id']
             session['user_name'] = user['full_name']
             session['role'] = user['role']
             
-            # Smart Redirect based on Role
             if user['role'] == 'officer':
                 return redirect(url_for('officer_dashboard'))
             return redirect(url_for('portal'))
         
-        return "❌ Login Failed: Invalid Username or Password. <a href='/login'>Try Again</a>"
+        print("❌ RESULT: Password does not match.")
+        print("--- DEBUG LOGIN END ---\n")
+        return "❌ Login Failed: Incorrect Password."
     
     return render_template('login.html')
 
-# --- OFFICER DASHBOARD (New Feature) ---
+# --- OFFICER DASHBOARD ---
+
+
+# --- OFFICER DASHBOARD (Updated) ---
 @app.route('/officer-dashboard', methods=['GET', 'POST'])
 def officer_dashboard():
-    # Security Guard
+    # 1. Security Check: Only Officers allowed
     if 'user_id' not in session or session.get('role') != 'officer':
-        return "⛔ Access Denied: Officers Only."
+        return "⛔ Access Denied: Authorized Personnel Only."
 
-    search_result = None
+    client_data = None
+    client_docs = []
+    error = None
+
     if request.method == 'POST':
         query_id = request.form.get('search_id').strip()
         
-        conn = sqlite3.connect('village_office.db')
+        conn = sqlite3.connect('village_office.db', timeout=10)
         conn.row_factory = sqlite3.Row
-        # Search for client by their Unique ID (VO-XXXX)
-        search_result = conn.execute("SELECT * FROM users WHERE client_id = ?", (query_id,)).fetchone()
+        
+        # 2. Fetch Client Personal Details
+        client_data = conn.execute("SELECT * FROM users WHERE client_id = ?", (query_id,)).fetchone()
+        
+        if client_data:
+            # 3. If client exists, Fetch their Documents
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM user_docs WHERE user_id = ?", (client_data['id'],))
+            client_docs = cursor.fetchall()
+        else:
+            error = "No record found for this Client ID."
+            
         conn.close()
 
     return render_template('officer_dashboard.html', 
                            officer_name=session.get('user_name'), 
-                           result=search_result)
+                           client=client_data, 
+                           documents=client_docs,
+                           error=error)
 
-# --- CLIENT PORTAL (Existing) ---
+
+
+# --- CLIENT PORTAL ---
 @app.route('/portal')
 def portal():
     if 'user_id' not in session: return redirect(url_for('login'))
     return render_template('index.html', 
                            user_name=session.get('user_name'),
-                           client_id=session.get('client_id')) # Pass ID to template
+                           client_id=session.get('client_id'))
 
-# (Keep your existing digilocker, profile, and check-eligibility routes here...)
-# For brevity, I am assuming the other existing routes remain the same.
+# --- ELIGIBILITY CHECK (Multi-Upload) ---
+@app.route('/check-eligibility', methods=['POST'])
+def check_eligibility():
+    if 'user_id' not in session: return redirect(url_for('login'))
+
+    service = request.form.get('service_type')
+    village = request.form.get('village_office')
+    
+    # Handle MULTIPLE File Uploads
+    uploaded_files = request.files.getlist('documents')
+    
+    for file in uploaded_files:
+        if file and allowed_file(file.filename):
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            filename = secure_filename(f"{service}_{session['user_id']}_{timestamp}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    flash(f"✅ Application for {service} submitted successfully to {village} office!")
+    return redirect(url_for('portal'))
+
+# --- DIGILOCKER ---
+@app.route('/digilocker', methods=['GET', 'POST'])
+def digilocker():
+    if 'user_id' not in session: return redirect(url_for('login'))
+
+    conn = sqlite3.connect('village_office.db', timeout=10)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        doc_type = request.form.get('doc_type')
+        file = request.files.get('file')
+
+        if file and allowed_file(file.filename):
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            filename = secure_filename(f"Locker_{session['user_id']}_{timestamp}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            cursor.execute('INSERT INTO user_docs (user_id, doc_type, filename, upload_date) VALUES (?, ?, ?, ?)',
+                           (session['user_id'], doc_type, filename, datetime.date.today()))
+            conn.commit()
+
+    cursor.execute("SELECT * FROM user_docs WHERE user_id = ?", (session['user_id'],))
+    documents = cursor.fetchall()
+    conn.close()
+
+    return render_template('digilocker.html', documents=documents)
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# --- PROFILE & UTILS ---
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    conn = sqlite3.connect('village_office.db', timeout=10)
+    conn.row_factory = sqlite3.Row
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+    conn.close()
+    return render_template('profile.html', user=user)
 
 @app.route('/logout')
 def logout():
@@ -178,7 +315,7 @@ def logout():
 
 @app.route('/clear-database')
 def clear_db():
-    conn = sqlite3.connect('village_office.db')
+    conn = sqlite3.connect('village_office.db', timeout=10)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users")
     conn.commit()
