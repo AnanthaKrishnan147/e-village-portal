@@ -136,56 +136,60 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Initialize attempts counter if not present
+    # Initialize attempts if not present
     if 'login_attempts' not in session:
         session['login_attempts'] = 0
 
     if request.method == 'POST':
-        # Check if already locked out
+        username_input = request.form.get('username', '').strip()
+        password_input = request.form.get('password')
+
+        # 1. Check for Lockout
         if session['login_attempts'] >= 3:
-            flash("⛔ Account Locked: Too many failed attempts. Please contact the Village Office.", "error")
-            return render_template('login.html')
+            return render_template('login.html', 
+                                   error_type="locked", 
+                                   username_value=username_input)
 
-        username_input = request.form.get('username') or request.form.get('user_id')
-        password = request.form.get('password')
-
-        if not username_input:
-            flash("❌ Error: Username cannot be empty.", "error")
-            return render_template('login.html')
-
-        username_input = username_input.strip()
-        
+        # 2. Database Lookup
         conn = sqlite3.connect('village_office.db', timeout=10)
         conn.row_factory = sqlite3.Row
         user = conn.execute("SELECT * FROM users WHERE username = ?", (username_input,)).fetchone()
         conn.close()
 
-        # VERIFY CREDENTIALS
-        if user and check_password_hash(user['password_hash'], password):
-            # ✅ SUCCESS: Reset attempts and Log in
-            session['login_attempts'] = 0
-            
-            session['user_id'] = user['id']
-            session['client_id'] = user['client_id']
-            session['user_name'] = user['full_name']
-            session['role'] = user['role']
-            
-            if user['role'] == 'officer':
-                return redirect(url_for('officer_dashboard'))
-            return redirect(url_for('portal'))
+        # 3. Validation Logic
+        if not user:
+            # Case A: Invalid Username
+            return render_template('login.html', 
+                                   error_type="username", 
+                                   username_value=username_input) # Keep what they typed
         
-        # ❌ FAILURE: Increment attempts
-        session['login_attempts'] += 1
-        remaining = 3 - session['login_attempts']
-        
-        if remaining > 0:
-            flash(f"❌ Invalid Credentials. {remaining} attempts remaining.", "error")
-        else:
-            flash("⛔ Maximum attempts reached. Access is now locked.", "error")
+        if not check_password_hash(user['password_hash'], password_input):
+            # Case B: Invalid Password
+            session['login_attempts'] += 1
+            remaining = 3 - session['login_attempts']
             
-        return render_template('login.html') # Stay on the login page
-    
+            if remaining <= 0:
+                return render_template('login.html', error_type="locked", username_value=username_input)
+            
+            return render_template('login.html', 
+                                   error_type="password", 
+                                   remaining=remaining,
+                                   username_value=username_input)
+
+        # 4. Success
+        session['login_attempts'] = 0 # Reset counter
+        session['user_id'] = user['id']
+        session['client_id'] = user['client_id']
+        session['user_name'] = user['full_name']
+        session['role'] = user['role']
+        
+        if user['role'] == 'officer':
+            return redirect(url_for('officer_dashboard'))
+        return redirect(url_for('portal'))
+
     return render_template('login.html')
+
+
 
 # --- OFFICER DASHBOARD ---
 

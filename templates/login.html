@@ -15,6 +15,7 @@
     </div>
 
     <main class="w-full max-w-md p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+        
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4">
                 <span class="text-3xl">🏛️</span>
@@ -23,41 +24,61 @@
             <p class="text-slate-500 mt-2 font-medium">Digital Village Services Portal</p>
         </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="mb-6 p-4 rounded-xl flex items-center gap-3 shadow-sm border
-                    {% if 'Locked' in message or 'Maximum' in message %} bg-red-100 border-red-200 text-red-800 
-                    {% else %} bg-orange-50 border-orange-200 text-orange-800 {% endif %}">
-                    <span class="text-xl">⚠️</span>
-                    <p class="text-sm font-bold">{{ message }}</p>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {% if error_type == 'locked' %}
+        <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl flex items-center gap-3">
+            <span class="text-2xl">⛔</span>
+            <div>
+                <p class="font-bold text-sm">Account Locked</p>
+                <p class="text-xs">Too many failed attempts. Contact admin.</p>
+            </div>
+        </div>
+        {% endif %}
 
         <form action="/login" method="POST" class="space-y-6">
             
             <div>
                 <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-[0.2em]">Username</label>
                 <div class="relative">
-                    <input type="text" name="username" placeholder="Enter your username" required
-                        class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all">
+                    <input type="text" name="username" placeholder="Enter your username" 
+                           value="{{ username_value if username_value else '' }}"
+                           class="w-full p-4 pl-12 rounded-2xl border-2 outline-none transition-all
+                           {% if error_type == 'username' %} border-red-500 bg-red-50 text-red-900 focus:border-red-600
+                           {% else %} border-slate-100 bg-slate-50/50 focus:border-blue-500 focus:bg-white {% endif %}"
+                           {% if error_type == 'locked' %}disabled{% endif %}>
                     <span class="absolute left-4 top-4 opacity-40">👤</span>
                 </div>
+                
+                {% if error_type == 'username' %}
+                    <p class="text-red-500 text-xs font-bold mt-2 ml-2 flex items-center gap-1">
+                        ❌ Invalid Username. Please check and try again.
+                    </p>
+                {% endif %}
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-[0.2em]">Password</label>
                 <div class="relative">
-                    <input type="password" name="password" placeholder="••••••••" required
-                        class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all">
+                    <input type="password" name="password" placeholder="••••••••" 
+                           class="w-full p-4 pl-12 rounded-2xl border-2 outline-none transition-all
+                           {% if error_type == 'password' %} border-red-500 bg-red-50 text-red-900 focus:border-red-600
+                           {% else %} border-slate-100 bg-slate-50/50 focus:border-blue-500 focus:bg-white {% endif %}"
+                           {% if error_type == 'locked' %}disabled{% endif %}>
                     <span class="absolute left-4 top-4 opacity-40">🔒</span>
                 </div>
+
+                {% if error_type == 'password' %}
+                    <p class="text-red-500 text-xs font-bold mt-2 ml-2 flex items-center gap-1">
+                        ❌ Incorrect Password. ({{ remaining }} attempts left)
+                    </p>
+                {% endif %}
             </div>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-                Login 🚀
+            <button type="submit" 
+                class="w-full py-4 rounded-2xl font-black shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]
+                {% if error_type == 'locked' %} bg-slate-400 cursor-not-allowed text-slate-200 shadow-none
+                {% else %} bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 {% endif %}"
+                {% if error_type == 'locked' %}disabled{% endif %}>
+                {% if error_type == 'locked' %} Locked 🔒 {% else %} Login 🚀 {% endif %}
             </button>
         </form>
 
