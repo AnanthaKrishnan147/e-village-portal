@@ -15,7 +15,7 @@
     </div>
 
     <main class="w-full max-w-md p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
-        <div class="text-center mb-10">
+        <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4">
                 <span class="text-3xl">🏛️</span>
             </div>
@@ -23,12 +23,25 @@
             <p class="text-slate-500 mt-2 font-medium">Digital Village Services Portal</p>
         </div>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-6 p-4 rounded-xl flex items-center gap-3 shadow-sm border
+                    {% if 'Locked' in message or 'Maximum' in message %} bg-red-100 border-red-200 text-red-800 
+                    {% else %} bg-orange-50 border-orange-200 text-orange-800 {% endif %}">
+                    <span class="text-xl">⚠️</span>
+                    <p class="text-sm font-bold">{{ message }}</p>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form action="/login" method="POST" class="space-y-6">
             
             <div>
                 <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-[0.2em]">Username</label>
                 <div class="relative">
-                    <input type="text" name="username" placeholder="Enter your username (NOT email)" required
+                    <input type="text" name="username" placeholder="Enter your username" required
                         class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all">
                     <span class="absolute left-4 top-4 opacity-40">👤</span>
                 </div>

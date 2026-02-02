@@ -136,50 +136,34 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Initialize attempts counter if not present
+    if 'login_attempts' not in session:
+        session['login_attempts'] = 0
+
     if request.method == 'POST':
-        # 1. Get the raw data from the form
-        username_input = request.form.get('username')
-        password_input = request.form.get('password')
+        # Check if already locked out
+        if session['login_attempts'] >= 3:
+            flash("⛔ Account Locked: Too many failed attempts. Please contact the Village Office.", "error")
+            return render_template('login.html')
 
-        # DEBUG PRINT: What did the form send?
-        print(f"\n--- DEBUG LOGIN START ---")
-        print(f"1. Form sent Username: '{username_input}'")
-        print(f"2. Form sent Password: '{password_input}'")
+        username_input = request.form.get('username') or request.form.get('user_id')
+        password = request.form.get('password')
 
-        # Robust check: If 'username' is empty, try finding 'user_id' or 'email'
         if not username_input:
-            print("   -> Username missing, checking fallback fields...")
-            username_input = request.form.get('user_id') or request.form.get('email')
-        
-        if not username_input:
-            print("❌ ERROR: No username found in form data.")
-            return "❌ Error: Browser sent empty username. Refresh page."
+            flash("❌ Error: Username cannot be empty.", "error")
+            return render_template('login.html')
 
         username_input = username_input.strip()
-
-        # 2. Database Lookup
+        
         conn = sqlite3.connect('village_office.db', timeout=10)
         conn.row_factory = sqlite3.Row
-        
-        print(f"3. Searching DB for username: '{username_input}'")
         user = conn.execute("SELECT * FROM users WHERE username = ?", (username_input,)).fetchone()
         conn.close()
 
-        # 3. Analyze the result
-        if user is None:
-            print(f"❌ RESULT: User '{username_input}' NOT FOUND in database.")
-            # OPTIONAL: Check if they used an email by mistake?
-            return f"❌ User '{username_input}' not found. Did you register?"
-        
-        print(f"✅ User found: ID={user['id']}, Role={user['role']}")
-        
-        # 4. Check Password
-        password_match = check_password_hash(user['password_hash'], password_input)
-        print(f"4. Password Verification Result: {password_match}")
-
-        if password_match:
-            print("✅ LOGIN SUCCESS! Redirecting...")
-            print("--- DEBUG LOGIN END ---\n")
+        # VERIFY CREDENTIALS
+        if user and check_password_hash(user['password_hash'], password):
+            # ✅ SUCCESS: Reset attempts and Log in
+            session['login_attempts'] = 0
             
             session['user_id'] = user['id']
             session['client_id'] = user['client_id']
@@ -190,9 +174,16 @@ def login():
                 return redirect(url_for('officer_dashboard'))
             return redirect(url_for('portal'))
         
-        print("❌ RESULT: Password does not match.")
-        print("--- DEBUG LOGIN END ---\n")
-        return "❌ Login Failed: Incorrect Password."
+        # ❌ FAILURE: Increment attempts
+        session['login_attempts'] += 1
+        remaining = 3 - session['login_attempts']
+        
+        if remaining > 0:
+            flash(f"❌ Invalid Credentials. {remaining} attempts remaining.", "error")
+        else:
+            flash("⛔ Maximum attempts reached. Access is now locked.", "error")
+            
+        return render_template('login.html') # Stay on the login page
     
     return render_template('login.html')
 
