@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Officer Dashboard - Digital Village</title>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen">
+
+    <nav class="bg-blue-900 text-white p-6 shadow-lg flex justify-between items-center px-12">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">👮‍♂️</span>
+            <div>
+                <h1 class="font-bold text-xl">Officer Portal</h1>
+                <p class="text-xs text-blue-300">Logged in as {{ officer_name }}</p>
+            </div>
+        </div>
+        <a href="/logout" class="bg-blue-800 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition border border-blue-700">Logout</a>
+    </nav>
+
+    <main class="max-w-4xl mx-auto mt-10 p-6">
+        
+        <div class="bg-white p-8 rounded-2xl shadow-xl mb-10 border-b-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">Verify Citizen Details</h2>
+            <form action="/officer-dashboard" method="POST" class="flex gap-4">
+                <input type="text" name="search_id" placeholder="Enter Client ID (e.g., VO-4829)" required
+                       class="flex-1 p-4 rounded-xl border-2 border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 outline-none font-mono text-lg uppercase">
+                <button type="submit" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition">
+                    Search 🔍
+                </button>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fade-in-up">
+            <div class="bg-green-50 p-6 border-b border-green-100 flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-green-900">✅ Client Found</h3>
+                    <p class="text-green-700 text-sm">ID: <span class="font-mono font-bold">{{ result['client_id'] }}</span></p>
+                </div>
+                <span class="bg-green-200 text-green-800 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Active</span>
+            </div>
+            
+            <div class="p-8 grid grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name</label>
+                    <p class="text-lg font-bold text-slate-800">{{ result['full_name'] }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Phone Number</label>
+                    <p class="text-lg font-bold text-slate-800">{{ result['phone'] }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address</label>
+                    <p class="text-lg font-bold text-slate-800">{{ result['email'] }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Govt ID (Aadhaar)</label>
+                    <p class="text-lg font-bold text-slate-800 font-mono">{{ result['govt_id'] }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Date of Birth</label>
+                    <p class="text-lg font-bold text-slate-800">{{ result['dob'] }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Role</label>
+                    <p class="text-lg font-bold text-slate-800 capitalize">{{ result['role'] }}</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-6 border-t border-slate-100 text-center">
+                <button class="text-blue-600 font-bold hover:underline">View Uploaded Documents ➔</button>
+            </div>
+        </div>
+        {% elif request.method == 'POST' %}
+        <div class="bg-red-50 p-8 rounded-2xl text-center border border-red-100">
+            <div class="text-4xl mb-2">❌</div>
+            <h3 class="text-red-900 font-bold text-lg">No Client Found</h3>
+            <p class="text-red-600">Please check the ID and try again.</p>
+        </div>
+        {% endif %}
+
+    </main>
+</body>
+</html>

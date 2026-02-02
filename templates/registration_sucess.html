@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Registration Successful</title>
+</head>
+<body class="bg-green-50 font-sans min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white p-10 rounded-3xl shadow-2xl max-w-lg w-full text-center border-t-8 border-green-500">
+        <div class="text-6xl mb-4">🎉</div>
+        <h1 class="text-3xl font-black text-slate-800 mb-2">Welcome, {{ name }}!</h1>
+        <p class="text-slate-500 mb-8">Your account has been created successfully.</p>
+
+        <div class="bg-green-100 p-6 rounded-2xl border-2 border-green-200 mb-8">
+            <p class="text-sm text-green-700 font-bold uppercase tracking-wider mb-2">Your Unique Client ID</p>
+            <p class="text-4xl font-black text-green-900 tracking-widest">{{ client_id }}</p>
+            <p class="text-xs text-green-600 mt-2">Please save this ID for future reference.</p>
+        </div>
+
+        <a href="/login" class="block w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg">
+            Go to Login ➔
+        </a>
+    </div>
+</body>
+</html>
