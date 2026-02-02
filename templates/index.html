@@ -23,103 +23,151 @@
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto mt-12 p-10 bg-white rounded-[2.5rem] shadow-xl border border-slate-100 mb-12">
-        <header class="mb-10">
-            <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Welcome, {{ user_name }}!</h2>
-            <p class="text-slate-500">Find your local Village Office and apply for certificates.</p>
-        </header>
+    <main class="max-w-5xl mx-auto mt-12 mb-12">
+        
+        <div class="p-10 bg-white rounded-[2.5rem] shadow-xl border border-slate-100 mb-12">
+            <header class="mb-10">
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Welcome, {{ user_name }}!</h2>
+                <p class="text-slate-500">Find your local Village Office and apply for certificates.</p>
+            </header>
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <div class="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl font-bold">
-              {{ messages[0] }}
-            </div>
-          {% endif %}
-        {% endwith %}
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl font-bold">
+                  {{ messages[0] }}
+                </div>
+              {% endif %}
+            {% endwith %}
 
-        <form action="/check-eligibility" method="POST" enctype="multipart/form-data" class="space-y-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Area Pincode</label>
-                    <div class="relative">  
-                        <input type="text" id="pincode-input" name="pincode" placeholder="e.g., 682001" required
-                               maxlength="6" inputmode="numeric"
-                               class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all font-mono text-lg tracking-widest">
-                        <span class="absolute left-4 top-4 text-xl opacity-50">📮</span>
-                        <div id="pincode-loader" class="absolute right-4 top-4 hidden">
-                            <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+            <form action="/check-eligibility" method="POST" enctype="multipart/form-data" class="space-y-8">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Area Pincode</label>
+                        <div class="relative">  
+                            <input type="text" id="pincode-input" name="pincode" placeholder="e.g., 682001" required
+                                   maxlength="6" inputmode="numeric"
+                                   class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all font-mono text-lg tracking-widest">
+                            <span class="absolute left-4 top-4 text-xl opacity-50">📮</span>
+                            <div id="pincode-loader" class="absolute right-4 top-4 hidden">
+                                <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p id="location-display" class="mt-2 text-sm text-slate-500 font-medium pl-2 min-h-[1.25rem]"></p>
+                    </div>
+
+                    <div id="village-section" class="hidden opacity-0 transition-opacity duration-500">
+                        <label class="block text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Select Your Village Office</label>
+                        <div class="relative">
+                            <select name="village_office" id="village-select" required
+                                    class="w-full p-4 rounded-2xl border-2 border-green-100 bg-green-50 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition-all appearance-none cursor-pointer font-bold text-green-900">
+                            </select>
+                            <span class="absolute right-4 top-5 pointer-events-none opacity-40">▼</span>
                         </div>
                     </div>
-                    <p id="location-display" class="mt-2 text-sm text-slate-500 font-medium pl-2 min-h-[1.25rem]"></p>
                 </div>
 
-                <div id="village-section" class="hidden opacity-0 transition-opacity duration-500">
-                    <label class="block text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Select Your Village Office</label>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Type of Service</label>
                     <div class="relative">
-                        <select name="village_office" id="village-select" required
-                                class="w-full p-4 rounded-2xl border-2 border-green-100 bg-green-50 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition-all appearance-none cursor-pointer font-bold text-green-900">
+                        <select id="service-select" name="service_type" class="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select the certificate you need...</option>
+                            
+                            <optgroup label="A. Residence & Identity">
+                                <option value="residence">Residence Certificate</option>
+                                <option value="identity">Identity Certificate</option>
+                                <option value="nativity">Nativity / Domicile Certificate</option>
+                            </optgroup>
+
+                            <optgroup label="B. Income & Financial Status">
+                                <option value="income">Income Certificate</option>
+                                <option value="ews">Non-Creamy Layer / EWS Certificate</option>
+                                <option value="unemployment">Unemployment Certificate</option>
+                            </optgroup>
+
+                            <optgroup label="C. Caste & Family">
+                                <option value="caste">Caste Certificate</option>
+                                <option value="family">Family Membership Certificate</option>
+                            </optgroup>
+
+                            <optgroup label="D. Birth, Death & Marriage">
+                                <option value="birth_late">Birth Certificate (Late Registration)</option>
+                                <option value="death">Death Certificate Assistance</option>
+                                <option value="marriage">Marriage Registration Support</option>
+                                <option value="legal_heir">Legal Heir Certificate</option>
+                            </optgroup>
+
+                            <optgroup label="E. Land & Property">
+                                <option value="possession">Land Ownership / Possession Cert</option>
+                                <option value="thandaper">Thandaper / Land Tax Issues</option>
+                                <option value="land_conversion">Land Use / Conversion</option>
+                            </optgroup>
                         </select>
                         <span class="absolute right-4 top-5 pointer-events-none opacity-40">▼</span>
                     </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Type of Service</label>
-                <div class="relative">
-                    <select id="service-select" name="service_type" class="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all appearance-none cursor-pointer">
-                        <option value="" disabled selected>Select the certificate you need...</option>
-                        
-                        <optgroup label="A. Residence & Identity">
-                            <option value="residence">Residence Certificate</option>
-                            <option value="identity">Identity Certificate</option>
-                            <option value="nativity">Nativity / Domicile Certificate</option>
-                        </optgroup>
+                <div id="upload-section" class="hidden">
+                    <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Upload Required Documents</label>
+                    <p class="text-sm text-slate-400 mb-4">Please upload clear copies of the following documents:</p>
+                    
+                    <div id="dynamic-uploads" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </div>
+                </div>
 
-                        <optgroup label="B. Income & Financial Status">
-                            <option value="income">Income Certificate</option>
-                            <option value="ews">Non-Creamy Layer / EWS Certificate</option>
-                            <option value="unemployment">Unemployment Certificate</option>
-                        </optgroup>
+                <button type="submit" id="verify-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3">
+                    Submit Application 🚀
+                </button>
+            </form>
+        </div>
 
-                        <optgroup label="C. Caste & Family">
-                            <option value="caste">Caste Certificate</option>
-                            <option value="family">Family Membership Certificate</option>
-                        </optgroup>
-
-                        <optgroup label="D. Birth, Death & Marriage">
-                            <option value="birth_late">Birth Certificate (Late Registration)</option>
-                            <option value="death">Death Certificate Assistance</option>
-                            <option value="marriage">Marriage Registration Support</option>
-                            <option value="legal_heir">Legal Heir Certificate</option>
-                        </optgroup>
-
-                        <optgroup label="E. Land & Property">
-                            <option value="possession">Land Ownership / Possession Cert</option>
-                            <option value="thandaper">Thandaper / Land Tax Issues</option>
-                            <option value="land_conversion">Land Use / Conversion</option>
-                        </optgroup>
-                    </select>
-                    <span class="absolute right-4 top-5 pointer-events-none opacity-40">▼</span>
+        <div class="mt-12 bg-red-50 border border-red-100 rounded-[2.5rem] p-10 shadow-lg">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-2xl shadow-sm">📢</div>
+                <div>
+                    <h2 class="text-2xl font-extrabold text-red-900">Report Illegal Activity</h2>
+                    <p class="text-red-600/80 font-medium">Report sand mining, encroachment, or waste dumping anonymously.</p>
                 </div>
             </div>
 
-            <div id="upload-section" class="hidden">
-                <label class="block text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Upload Required Documents</label>
-                <p class="text-sm text-slate-400 mb-4">Please upload clear copies of the following documents:</p>
-                
-                <div id="dynamic-uploads" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form action="/report-issue" method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-red-400 uppercase mb-2">Issue Category</label>
+                        <div class="relative">
+                            <select name="category" required class="w-full p-4 rounded-xl border border-red-200 bg-white focus:border-red-500 outline-none appearance-none cursor-pointer">
+                                <option value="" disabled selected>Select Violation Type...</option>
+                                <option value="Illegal Sand Mining">Illegal Sand Mining</option>
+                                <option value="Land Encroachment">Govt Land Encroachment</option>
+                                <option value="Waste Dumping">Illegal Waste Dumping</option>
+                                <option value="Wetland Filling">Wetland / Paddy Field Filling</option>
+                                <option value="Other">Other Civil Violation</option>
+                            </select>
+                            <span class="absolute right-4 top-5 pointer-events-none opacity-40 text-red-400">▼</span>
+                        </div>
                     </div>
-            </div>
+                    <div>
+                        <label class="block text-xs font-bold text-red-400 uppercase mb-2">Location / Landmark</label>
+                        <input type="text" name="location" placeholder="e.g., Near Periyar River Bank, Ward 4" required
+                               class="w-full p-4 rounded-xl border border-red-200 bg-white focus:border-red-500 outline-none">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-red-400 uppercase mb-2">Brief Description</label>
+                    <textarea name="description" rows="3" placeholder="Describe the activity you witnessed..." required
+                              class="w-full p-4 rounded-xl border border-red-200 bg-white focus:border-red-500 outline-none"></textarea>
+                </div>
 
-            <button type="submit" id="verify-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3">
-                Submit Application 🚀
-            </button>
-        </form>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-red-200 transition flex items-center gap-2 transform hover:scale-[1.01] active:scale-[0.98]">
+                    <span>🚨</span> Submit Report to Officer
+                </button>
+            </form>
+        </div>
+
     </main>
 
     <script>

@@ -25,7 +25,7 @@ def init_db():
     conn = sqlite3.connect('village_office.db', timeout=10)
     cursor = conn.cursor()
     
-    # Users Table (New Schema with Username & Client ID)
+    # Users Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +52,20 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+
+    # NEW: Complaints Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS complaints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            category TEXT NOT NULL,
+            description TEXT NOT NULL,
+            location TEXT NOT NULL,
+            status TEXT DEFAULT 'Pending',
+            date_reported TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -60,7 +74,6 @@ init_db()
 
 # --- 2. Helper Functions ---
 def generate_client_id():
-    # Generates a random ID like "VO-8492"
     suffix = ''.join(random.choices(string.digits, k=4))
     return f"VO-{suffix}"
 
@@ -72,13 +85,10 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     if 'user_id' in session:
-        # Smart Redirect based on role
         if session.get('role') == 'officer':
             return redirect(url_for('officer_dashboard'))
         return redirect(url_for('portal'))
     return redirect(url_for('login'))
-
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -92,7 +102,6 @@ def register():
         govt_id = request.form.get('govt_id')
         password = request.form.get('password')
 
-        # Generate Unique Client ID & Hash Password
         new_client_id = generate_client_id()
         hashed_pw = generate_password_hash(password, method='scrypt')
 
@@ -100,28 +109,24 @@ def register():
             conn = sqlite3.connect('village_office.db', timeout=10)
             cursor = conn.cursor()
             
-            # 1. Insert User into Database
             cursor.execute('''
                 INSERT INTO users (client_id, role, username, full_name, dob, phone, email, govt_id, password_hash) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (new_client_id, role, username, name, dob, phone, email, govt_id, hashed_pw))
             
-            # Get the ID of the new user we just created
             new_user_db_id = cursor.lastrowid
             conn.commit()
             conn.close()
 
-            # 2. AUTO-LOGIN: Set session variables immediately
+            # Auto-Login
             session['user_id'] = new_user_db_id
             session['client_id'] = new_client_id
             session['user_name'] = name
             session['role'] = role
             
-            # 3. DIRECT REDIRECT: Go straight to the dashboard
             if role == 'officer':
                 return redirect(url_for('officer_dashboard'))
             
-            # Add a welcome flash message
             flash(f"🎉 Welcome {name}! Your Client ID is {new_client_id}")
             return redirect(url_for('portal'))
             
@@ -132,11 +137,8 @@ def register():
 
     return render_template('register.html')
 
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Initialize attempts if not present
     if 'login_attempts' not in session:
         session['login_attempts'] = 0
 
@@ -144,40 +146,26 @@ def login():
         username_input = request.form.get('username', '').strip()
         password_input = request.form.get('password')
 
-        # 1. Check for Lockout
         if session['login_attempts'] >= 3:
-            return render_template('login.html', 
-                                   error_type="locked", 
-                                   username_value=username_input)
+            return render_template('login.html', error_type="locked", username_value=username_input)
 
-        # 2. Database Lookup
         conn = sqlite3.connect('village_office.db', timeout=10)
         conn.row_factory = sqlite3.Row
         user = conn.execute("SELECT * FROM users WHERE username = ?", (username_input,)).fetchone()
         conn.close()
 
-        # 3. Validation Logic
         if not user:
-            # Case A: Invalid Username
-            return render_template('login.html', 
-                                   error_type="username", 
-                                   username_value=username_input) # Keep what they typed
+            return render_template('login.html', error_type="username", username_value=username_input)
         
         if not check_password_hash(user['password_hash'], password_input):
-            # Case B: Invalid Password
             session['login_attempts'] += 1
             remaining = 3 - session['login_attempts']
-            
             if remaining <= 0:
                 return render_template('login.html', error_type="locked", username_value=username_input)
-            
-            return render_template('login.html', 
-                                   error_type="password", 
-                                   remaining=remaining,
-                                   username_value=username_input)
+            return render_template('login.html', error_type="password", remaining=remaining, username_value=username_input)
 
-        # 4. Success
-        session['login_attempts'] = 0 # Reset counter
+        # Success
+        session['login_attempts'] = 0
         session['user_id'] = user['id']
         session['client_id'] = user['client_id']
         session['user_name'] = user['full_name']
@@ -189,18 +177,18 @@ def login():
 
     return render_template('login.html')
 
-
-
-# --- OFFICER DASHBOARD ---
-
-
-# --- OFFICER DASHBOARD (Updated) ---
+# --- OFFICER DASHBOARD (With Notifications) ---
 @app.route('/officer-dashboard', methods=['GET', 'POST'])
 def officer_dashboard():
-    # 1. Security Check: Only Officers allowed
     if 'user_id' not in session or session.get('role') != 'officer':
         return "⛔ Access Denied: Authorized Personnel Only."
 
+    conn = sqlite3.connect('village_office.db', timeout=10)
+    conn.row_factory = sqlite3.Row
+
+    # NEW: Fetch Complaints
+    complaints = conn.execute("SELECT * FROM complaints WHERE status='Pending' ORDER BY id DESC").fetchall()
+    
     client_data = None
     client_docs = []
     error = None
@@ -208,29 +196,23 @@ def officer_dashboard():
     if request.method == 'POST':
         query_id = request.form.get('search_id').strip()
         
-        conn = sqlite3.connect('village_office.db', timeout=10)
-        conn.row_factory = sqlite3.Row
-        
-        # 2. Fetch Client Personal Details
         client_data = conn.execute("SELECT * FROM users WHERE client_id = ?", (query_id,)).fetchone()
         
         if client_data:
-            # 3. If client exists, Fetch their Documents
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM user_docs WHERE user_id = ?", (client_data['id'],))
             client_docs = cursor.fetchall()
         else:
             error = "No record found for this Client ID."
             
-        conn.close()
+    conn.close()
 
     return render_template('officer_dashboard.html', 
                            officer_name=session.get('user_name'), 
                            client=client_data, 
                            documents=client_docs,
+                           complaints=complaints,
                            error=error)
-
-
 
 # --- CLIENT PORTAL ---
 @app.route('/portal')
@@ -240,15 +222,13 @@ def portal():
                            user_name=session.get('user_name'),
                            client_id=session.get('client_id'))
 
-# --- ELIGIBILITY CHECK (Multi-Upload) ---
+# --- ELIGIBILITY CHECK ---
 @app.route('/check-eligibility', methods=['POST'])
 def check_eligibility():
     if 'user_id' not in session: return redirect(url_for('login'))
 
     service = request.form.get('service_type')
     village = request.form.get('village_office')
-    
-    # Handle MULTIPLE File Uploads
     uploaded_files = request.files.getlist('documents')
     
     for file in uploaded_files:
@@ -258,6 +238,29 @@ def check_eligibility():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     flash(f"✅ Application for {service} submitted successfully to {village} office!")
+    return redirect(url_for('portal'))
+
+# --- NEW: REPORT GRIEVANCE ROUTE ---
+@app.route('/report-issue', methods=['POST'])
+def report_issue():
+    if 'user_id' not in session: return redirect(url_for('login'))
+
+    category = request.form.get('category')
+    location = request.form.get('location')
+    description = request.form.get('description')
+    
+    conn = sqlite3.connect('village_office.db', timeout=10)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO complaints (user_id, category, location, description, date_reported)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (session['user_id'], category, location, description, datetime.date.today()))
+    
+    conn.commit()
+    conn.close()
+    
+    flash("📢 Complaint Registered Successfully! The Village Officer has been notified.")
     return redirect(url_for('portal'))
 
 # --- DIGILOCKER ---
@@ -313,6 +316,9 @@ def clear_db():
     conn = sqlite3.connect('village_office.db', timeout=10)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users")
+    # Also clear complaints and docs if you want a full wipe
+    cursor.execute("DELETE FROM user_docs")
+    cursor.execute("DELETE FROM complaints") 
     conn.commit()
     conn.close()
     return "✅ System Wiped. <a href='/register'>Restart Registration</a>"
