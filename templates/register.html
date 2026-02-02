@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Register - Digital Village Office</title>
-    <style>
-        /* Visual feedback for invalid fields while typing */
-        input:invalid:focus {
-            border-color: #ef4444;
-            ring-color: rgba(239, 68, 68, 0.2);
-        }
-    </style>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-6">
 
@@ -19,82 +12,86 @@
     <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Join the Digital Village</h2>
     
     <div class="flex gap-4 mb-8">
-        <button id="btn-applicant" type="button" onclick="setRole('applicant')" class="flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all">
-            Citizen / Applicant
-        </button>
-        <button id="btn-officer" type="button" onclick="setRole('officer')" class="flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">
-            Village Officer
-        </button>
+        <button id="btn-applicant" type="button" onclick="setRole('applicant')" class="flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all">Citizen</button>
+        <button id="btn-officer" type="button" onclick="setRole('officer')" class="flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">Village Officer</button>
     </div>
 
     <form id="reg-form" action="/register" method="POST" class="space-y-4">
         <input type="hidden" name="role" id="role-input" value="applicant">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="full_name" placeholder="Full Name" 
-                   class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
-            <input type="date" name="dob" 
-                   class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
+        <input type="text" name="full_name" placeholder="Full Name" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
+        <div class="grid grid-cols-2 gap-4">
+            <input type="date" name="dob" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
+            <input type="tel" name="phone" placeholder="Phone (10 digits)" pattern="[0-9]{10}" class="p-4 border rounded-xl outline-none focus:border-blue-500" required>
         </div>
-
-        <input type="tel" name="phone" placeholder="Phone Number (10 digits)" 
-               pattern="[0-9]{10}" 
-               title="Please enter exactly 10 digits"
-               class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
-
-        <input type="email" name="email" placeholder="Email Address (@gmail, @yahoo, etc.)" 
-               pattern="[a-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|icloud)\.com$"
-               title="Please use a valid domain (e.g., @gmail.com, @yahoo.com)"
-               class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
-
-        <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Government ID (Aadhaar)</label>
-            <input type="text" name="govt_id" placeholder="12-Digit ID Number" 
-                   pattern="[0-9]{12}" 
-                   title="Aadhaar must be exactly 12 digits"
-                   maxlength="12"
-                   class="w-full mt-2 p-2 border-b bg-transparent outline-none focus:border-blue-500" required>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-sm font-bold text-slate-600 mb-2 uppercase">Create Username</label>
-            <input type="text" name="username" placeholder="e.g., citizen_joy" required
-                   class="w-full p-4 border rounded-xl outline-none focus:border-blue-500 bg-slate-50">
-            <p class="text-xs text-slate-400 mt-1">You will use this to login.</p>
-        </div>
-
-        <input type="password" name="password" placeholder="Create Strong Password" 
-               pattern="^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$"
-               title="Must start with a Capital letter, minimum 8 characters, include a lowercase letter, a digit, and a special character."
-               class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-blue-500" required>
-
-        <button type="submit" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black shadow-lg hover:bg-blue-800 transition-transform transform active:scale-95">
-            Finalize Account 🛡️
-        </button>
+        <input type="email" name="email" placeholder="Email Address" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
+        <input type="text" name="govt_id" placeholder="Aadhaar Number (12 digits)" pattern="[0-9]{12}" class="w-full p-4 border rounded-xl outline-none focus:border-blue-500" required>
         
-        <p class="text-center text-sm text-slate-500 mt-4">
-            Already registered? <a href="/login" class="text-blue-600 font-bold hover:underline">Login here</a>
-        </p>
+        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <label class="block text-xs font-bold text-blue-800 uppercase mb-2">Home / Office Jurisdiction</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="relative">
+                    <input type="text" id="reg-pincode" name="pincode" placeholder="Pincode (e.g. 682001)" required maxlength="6"
+                           class="w-full p-3 border rounded-lg focus:border-blue-500 outline-none">
+                    <div id="reg-loader" class="absolute right-3 top-3 hidden"><span class="animate-spin">↻</span></div>
+                </div>
+                <select name="village_office" id="reg-office" required class="w-full p-3 border rounded-lg focus:border-blue-500 bg-white">
+                    <option value="" disabled selected>Select Pincode First</option>
+                </select>
+            </div>
+            <p id="reg-loc-msg" class="text-xs text-slate-500 mt-2 ml-1"></p>
+        </div>
+
+        <div class="mb-4 pt-4 border-t">
+            <label class="block text-sm font-bold text-slate-600 mb-2 uppercase">Create Login Details</label>
+            <input type="text" name="username" placeholder="Username" required class="w-full p-4 border rounded-xl outline-none focus:border-blue-500 bg-slate-50 mb-4">
+            <input type="password" name="password" placeholder="Password (Min 8 chars, 1 Capital, 1 Number)" 
+                   pattern="^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$"
+                   class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-blue-500" required>
+        </div>
+
+        <button type="submit" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black shadow-lg hover:bg-blue-800 transition-transform transform active:scale-95">Finalize Account 🛡️</button>
+        <p class="text-center text-sm text-slate-500 mt-4">Already registered? <a href="/login" class="text-blue-600 font-bold hover:underline">Login here</a></p>
     </form>
 </main>
 
 <script>
     function setRole(role) {
-        const roleInput = document.getElementById('role-input');
-        const btnApplicant = document.getElementById('btn-applicant');
-        const btnOfficer = document.getElementById('btn-officer');
-
-        roleInput.value = role;
-
-        if (role === 'applicant') {
-            btnApplicant.className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
-            btnOfficer.className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
+        document.getElementById('role-input').value = role;
+        if(role === 'applicant') {
+            document.getElementById('btn-applicant').className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
+            document.getElementById('btn-officer').className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
         } else {
-            btnOfficer.className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
-            btnApplicant.className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
+            document.getElementById('btn-officer').className = "flex-1 p-4 border-2 border-blue-600 rounded-2xl text-blue-600 font-bold bg-blue-50 transition-all";
+            document.getElementById('btn-applicant').className = "flex-1 p-4 border-2 border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all";
         }
     }
-</script>
 
+    // Pincode Logic for Registration
+    document.getElementById('reg-pincode').addEventListener('input', async function(e) {
+        const val = this.value.replace(/[^0-9]/g, '');
+        this.value = val;
+        if(val.length === 6) {
+            document.getElementById('reg-loader').classList.remove('hidden');
+            try {
+                const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
+                const data = await res.json();
+                if(data[0].Status === "Success") {
+                    const offices = data[0].PostOffice;
+                    document.getElementById('reg-loc-msg').textContent = `📍 ${offices[0].District}, ${offices[0].State}`;
+                    const select = document.getElementById('reg-office');
+                    select.innerHTML = '<option value="" disabled selected>Select Office</option>';
+                    offices.forEach(off => {
+                        const opt = document.createElement('option');
+                        opt.value = off.Name;
+                        opt.textContent = off.Name;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch(e) {}
+            document.getElementById('reg-loader').classList.add('hidden');
+        }
+    });
+</script>
 </body>
 </html>

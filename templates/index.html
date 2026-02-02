@@ -75,7 +75,6 @@
                     <div class="relative">
                         <select id="service-select" name="service_type" class="w-full p-5 rounded-2xl border-2 border-slate-200 bg-white focus:border-blue-900 focus:ring-4 focus:ring-blue-100 outline-none transition-all appearance-none cursor-pointer text-lg text-slate-700">
                             <option value="" disabled selected>Select the certificate you need...</option>
-                            
                             <optgroup label="A. Residence & Identity">
                                 <option value="residence">Residence Certificate</option>
                                 <option value="identity">Identity Certificate</option>
@@ -110,8 +109,7 @@
                     <label class="block text-sm font-bold text-blue-950 mb-3 uppercase tracking-wider">Upload Required Documents</label>
                     <p class="text-sm text-slate-400 mb-4">Please upload clear copies of the following documents:</p>
                     
-                    <div id="dynamic-uploads" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        </div>
+                    <div id="dynamic-uploads" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
 
                 <button type="submit" id="verify-btn" class="w-full bg-blue-950 hover:bg-blue-900 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3 text-lg">
@@ -125,16 +123,38 @@
                 <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-2xl border border-red-100">📢</div>
                 <div>
                     <h2 class="text-2xl font-black text-red-950">Report Illegal Activity</h2>
-                    <p class="text-slate-500 font-medium">Report sand mining, encroachment, or waste dumping anonymously.</p>
+                    <p class="text-slate-500 font-medium">Alert the specific Village Officer in charge of the area.</p>
                 </div>
             </div>
 
             <form action="/report-issue" method="POST" class="space-y-6">
+                
+                <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
+                    <h3 class="text-red-900 font-bold text-sm uppercase mb-4">1. Where is this happening? (Required)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-red-400 uppercase mb-2">Target Pincode</label>
+                            <div class="relative">
+                                <input type="text" id="comp-pincode" name="complaint_pincode" placeholder="Pincode (e.g. 682001)" required maxlength="6"
+                                       class="w-full p-4 rounded-xl border-2 border-red-200 bg-white focus:border-red-500 outline-none font-mono font-bold text-red-900">
+                                <div id="comp-loader" class="absolute right-4 top-4 hidden"><span class="animate-spin text-red-500">↻</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-red-400 uppercase mb-2">Select Village Office</label>
+                            <select id="comp-office" name="complaint_village_office" required 
+                                    class="w-full p-4 rounded-xl border-2 border-red-200 bg-white focus:border-red-500 outline-none font-bold text-red-900">
+                                <option value="" disabled selected>Enter Pincode First...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Issue Category</label>
                         <div class="relative">
-                            <select name="category" required class="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-red-500 outline-none appearance-none cursor-pointer">
+                            <select name="category" required class="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-red-500 outline-none cursor-pointer">
                                 <option value="" disabled selected>Select Violation Type...</option>
                                 <option value="Illegal Sand Mining">Illegal Sand Mining</option>
                                 <option value="Land Encroachment">Govt Land Encroachment</option>
@@ -142,24 +162,23 @@
                                 <option value="Wetland Filling">Wetland / Paddy Field Filling</option>
                                 <option value="Other">Other Civil Violation</option>
                             </select>
-                            <span class="absolute right-4 top-5 pointer-events-none opacity-40 text-slate-400">▼</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Location / Landmark</label>
-                        <input type="text" name="location" placeholder="e.g., Near Periyar River Bank, Ward 4" required
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Specific Landmark</label>
+                        <input type="text" name="location" placeholder="e.g., Behind St. Mary's School" required
                                class="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-red-500 outline-none">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Brief Description</label>
-                    <textarea name="description" rows="3" placeholder="Describe the activity you witnessed..." required
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
+                    <textarea name="description" rows="3" placeholder="Describe the activity..." required
                               class="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-red-500 outline-none"></textarea>
                 </div>
 
-                <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition flex items-center gap-2 transform hover:scale-[1.01] active:scale-[0.98]">
-                    <span>🚨</span> Submit Report to Officer
+                <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition flex items-center gap-2 w-full justify-center">
+                    <span>🚨</span> Submit Report to This Officer
                 </button>
             </form>
         </div>
@@ -167,7 +186,7 @@
     </main>
 
     <script>
-        // ... (Javascript remains identical, copy it from previous index.html) ...
+        // --- 1. PINCODE LOGIC (Service Application) ---
         const pinInput = document.getElementById('pincode-input');
         const loader = document.getElementById('pincode-loader');
         const locationDisplay = document.getElementById('location-display');
@@ -206,32 +225,57 @@
             finally { loader.classList.add('hidden'); }
         }
 
+        // --- 2. PINCODE LOGIC (Complaint Form) ---
+        document.getElementById('comp-pincode').addEventListener('input', async function(e) {
+            const val = this.value.replace(/[^0-9]/g, '');
+            this.value = val;
+            if(val.length === 6) {
+                document.getElementById('comp-loader').classList.remove('hidden');
+                try {
+                    const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
+                    const data = await res.json();
+                    if(data[0].Status === "Success") {
+                        const offices = data[0].PostOffice;
+                        const select = document.getElementById('comp-office');
+                        select.innerHTML = '<option value="" disabled selected>Select Local Office</option>';
+                        offices.forEach(off => {
+                            const opt = document.createElement('option');
+                            opt.value = off.Name;
+                            opt.textContent = off.Name;
+                            select.appendChild(opt);
+                        });
+                    }
+                } catch(e) {}
+                document.getElementById('comp-loader').classList.add('hidden');
+            }
+        });
+
+        // --- 3. DYNAMIC UPLOAD GENERATOR ---
         const serviceSelect = document.getElementById('service-select');
         const uploadSection = document.getElementById('upload-section');
         const dynamicUploads = document.getElementById('dynamic-uploads');
 
         const docRequirements = {
-            'residence': ["Aadhaar Card", "Ration Card", "Utility Bill (Elec/Water)", "Rental Agreement (if applicable)"],
-            'identity': ["Any Old ID (School/Hospital)", "Ward Member Recommendation Letter", "Recent Photo"],
-            'nativity': ["SSLC Book / School Record", "Birth Certificate", "Parents' Identity Proof", "Residence Certificate"],
-            'income': ["Aadhaar Card", "Ration Card", "Salary Slip / Employer Letter", "Bank Passbook (Last 6 Months)"],
-            'ews': ["Caste Certificate", "Income Certificate", "Land/House Tax Receipt", "Vehicle RC (if owned)", "Notary Affidavit"],
-            'unemployment': ["Aadhaar Card", "SSLC/Degree Certificates", "Employment Exchange Reg Card", "Self-declaration Affidavit"],
-            'caste': ["SSLC Book", "Birth Certificate", "Ration Card", "Parents' Caste Proof (if SSLC unavailable)"],
-            'family': ["Ration Card", "Aadhaar of All Members", "Marriage Certificate", "Birth Certificates of Children"],
-            'birth_late': ["Hospital Discharge Summary", "School Admission Register", "Affidavit from Magistrate", "Parents' ID Proofs"],
-            'death': ["Doctor's Death Certificate", "Burial/Cremation Receipt", "Aadhaar of Deceased", "Ration Card"],
-            'marriage': ["Joint Photo", "Aadhaar of Bride & Groom", "Age Proof (SSLC/Birth Cert)", "Invitation Card/Witness IDs"],
-            'legal_heir': ["Death Certificate", "Relationship Proof (Ration Card)", "Aadhaar of All Heirs", "Consent Affidavit"],
-            'possession': ["Registered Title Deed", "Current Land Tax Receipt", "Encumbrance Certificate (EC)", "Aadhaar Card"],
-            'thandaper': ["Old Tax Receipt", "Title Deed", "Application for Mutation", "Survey Sketch"],
-            'land_conversion': ["Application Form", "Data Bank Extract", "Survey Plan", "Possession Certificate"]
+            'residence': ["Aadhaar Card", "Ration Card", "Utility Bill", "Rental Agreement"],
+            'identity': ["Old ID", "Ward Member Letter", "Recent Photo"],
+            'nativity': ["SSLC Book", "Birth Certificate", "Parents' Identity Proof", "Residence Cert"],
+            'income': ["Aadhaar Card", "Ration Card", "Salary Slip", "Bank Passbook"],
+            'ews': ["Caste Cert", "Income Cert", "Tax Receipt", "Vehicle RC", "Affidavit"],
+            'unemployment': ["Aadhaar Card", "SSLC/Degree", "Employment Exchange Card", "Affidavit"],
+            'caste': ["SSLC Book", "Birth Cert", "Ration Card", "Parents' Caste Proof"],
+            'family': ["Ration Card", "Aadhaar (All)", "Marriage Cert", "Birth Certs (Kids)"],
+            'birth_late': ["Hospital Record", "School Record", "Affidavit", "Parents' IDs"],
+            'death': ["Doctor's Cert", "Burial Receipt", "Aadhaar (Deceased)", "Ration Card"],
+            'marriage': ["Joint Photo", "Aadhaar (Couple)", "Age Proof", "Invitation/Witness"],
+            'legal_heir': ["Death Cert", "Ration Card", "Aadhaar (Heirs)", "Consent Affidavit"],
+            'possession': ["Title Deed", "Tax Receipt", "Encumbrance Cert", "Aadhaar"],
+            'thandaper': ["Old Tax Receipt", "Title Deed", "Mutation App", "Survey Sketch"],
+            'land_conversion': ["Application", "Data Bank Extract", "Survey Plan", "Possession Cert"]
         };
 
         serviceSelect.addEventListener('change', function() {
             const selectedService = this.value;
             const requiredDocs = docRequirements[selectedService];
-
             if (requiredDocs) {
                 dynamicUploads.innerHTML = '';
                 requiredDocs.forEach((docName, index) => {
@@ -243,10 +287,8 @@
                         </label>
                         <input type="file" name="documents" required
                                class="block w-full text-sm text-slate-500
-                               file:mr-4 file:py-2 file:px-4
-                               file:rounded-full file:border-0
-                               file:text-xs file:font-bold
-                               file:bg-blue-50 file:text-blue-900
+                               file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                               file:text-xs file:font-bold file:bg-blue-50 file:text-blue-900
                                hover:file:bg-blue-100">
                     `;
                     dynamicUploads.appendChild(div);
